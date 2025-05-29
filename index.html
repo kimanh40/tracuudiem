@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background: #fff;
+      }
+      h1 {
+        color: #4B0082;
+        font-size: 22px;
+        margin-bottom: 0;
+      }
+      h2 {
+        color: #333;
+        font-size: 18px;
+        margin-bottom: 20px;
+      }
+      label {
+        font-weight: bold;
+      }
+      input, select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        font-size: 14px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4B0082;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+      }
+      .card {
+        margin-top: 20px;
+        border: 1px solid #d0d0d0;
+        border-radius: 10px;
+        padding: 15px;
+        background: #f9f9f9;
+      }
+      .card div {
+        margin-bottom: 10px;
+        padding: 6px 10px;
+        border: 1px dashed #ccc;
+        border-radius: 6px;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Trung Tâm Ngoại Ngữ ISEE</h1>
+    <h2>Tra Cứu Điểm Thi Đánh Giá Nội Bộ - Trước Kỳ Thi</h2>
+
+    <label>Số CCCD:</label>
+    <input type="text" id="cccd" placeholder="Nhập số CCCD...">
+
+    <label>Mã thi:</label>
+    <select id="ma">
+      <option>Đang tải...</option>
+    </select>
+
+    <button onclick="searchScore()">Tra cứu</button>
+
+    <div id="result"></div>
+
+    <script>
+      function searchScore() {
+        const cccd = document.getElementById("cccd").value.trim();
+        const ma = document.getElementById("ma").value;
+
+        if (!cccd || !ma) {
+          alert("Vui lòng nhập đầy đủ thông tin.");
+          return;
+        }
+
+        google.script.run.withSuccessHandler(showResult).getStudentScore(cccd, ma);
+      }
+
+      function showResult(res) {
+        const resultDiv = document.getElementById("result");
+        if (res.error) {
+          resultDiv.innerHTML = `<div style="color:red; font-weight:bold;">${res.error}</div>`;
+        } else {
+          resultDiv.innerHTML = `
+            <div class="card">
+              <div><strong>👤 Họ Tên:</strong> ${res.hoten}</div>
+              <div><strong>📘 Khóa:</strong> ${res.khoa}</div>
+              <div><strong>🕐 Ca thi:</strong> ${res.cathi}</div>
+              <div><strong>🎧 Nghe:</strong> ${res.nghe}</div>
+              <div><strong>📖 Đọc:</strong> ${res.doc}</div>
+              <div><strong>✍️ Viết:</strong> ${res.viet}</div>
+              <div><strong>🗣️ Nói:</strong> ${res.noi}</div>
+              <div><strong>🎯 Tổng điểm:</strong> ${res.tong}</div>
+            </div>
+          `;
+        }
+      }
+
+      window.onload = function () {
+        google.script.run.withSuccessHandler(function(maList) {
+          const select = document.getElementById("ma");
+          select.innerHTML = "";
+          maList.forEach(ma => {
+            const opt = document.createElement("option");
+            opt.value = ma;
+            opt.innerText = ma;
+            select.appendChild(opt);
+          });
+        }).getMaThiList();
+      };
+    </script>
+  </body>
+</html>
